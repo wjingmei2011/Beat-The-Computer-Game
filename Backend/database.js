@@ -50,7 +50,7 @@ db.userExists = async (username) => {
             const result = await pool.query(query);
             return result.rows.length > 0;
         } catch (error){
-            throw new Error('There is an error during user verification:', error)} 
+            throw new Error(`There is an error during user verification:', ${error.message}`)} 
         } else {
         throw new Error('User name is required');
     }
@@ -67,7 +67,7 @@ db.verifyUser = async (username, password) => {
         try {const result = await pool.query(query);
         return result.rows.length > 0;
         } catch(error) {
-            throw new Error('There is an error during user verification:', error);
+            throw new Error(`There is an error during user verification:', ${error.message}`);
         }
     } else {
         throw new Error('Please enter valid username and password');
