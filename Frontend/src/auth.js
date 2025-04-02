@@ -9,11 +9,15 @@ const Auth = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [isSignUp, setIsSignUp] = useState(true);
+    const [message, setMessage] = useState('');
     const navigate = useNavigate();
 
+    const reset = () => {
+        setUsername('');
+        setPassword('');
+    };
 
     const handleSignUp = async () => {
-        console.log('Request Payload:', { username, password });
         try {
             const response = await fetch(`${backendUrl}/game/signup`, {
                 method: 'POST',
@@ -25,18 +29,27 @@ const Auth = () => {
             const data = await response.json();
 
             if (response.ok) {
-                alert('Sign up successful. Please sign in.');
+                setMessage('Sign up successful. Now redirected to the sign in page.');
                 setIsSignUp(false);
+                reset();
+                setTimeout(() => {
+                    navigate('/');
+                }, 2000);
             }
             else if (response.status === 400 && data.message === 'Username already exists') {
-                alert('User already exists. Please sign in.');
+                setMessage('User already exists. Please sign in.');
                 setIsSignUp(false);
+                reset();
+                setTimeout(() => {
+                    navigate('/'); 
+                }, 2000);
             } else {
-                alert('Sign up failed. Here is the message from the server:', data.message);
+                setMessage('Sign up failed. Please ensure you provide a valid username and password.');
+                reset();
             }
         } catch (error) {
             console.error('Error during sign up:', error);
-            alert('Error during sign up:', error);
+            setMessage('Error during sign up:', error.message);
         }
         };
 
@@ -48,20 +61,24 @@ const Auth = () => {
                     body: JSON.stringify({ username, password }),
                     credentials: 'include',
                 });
-                
+
                 // parsing response
                 const data = await response.json();
 
                 if (response.ok) {
-                    alert('Sign in successful.');
+                    setMessage('Sign in successful. Now redirecting to the game session.');
                     localStorage.setItem('username', username);
-                    navigate('/game'); // Redirect to home page after sign in
+                    reset();
+                    setTimeout(() => {
+                        navigate('game'); 
+                    }, 2000);
                 } else {
-                    alert('Sign in failed. Here is the message from the server:', response.message);
+                    setMessage('Sign in failed. Please ensure you provide a valid username and password.');
+                    reset();
                 }
             } catch (error) {
                 console.error('Error during sign in:', error);
-                alert('Error during sign in:', error);
+                setMessage(`Error during sign in: ${error.message}`);
             }
         };
 
@@ -76,7 +93,7 @@ const Auth = () => {
 
         //renders differently: if the user is not signed up, the page will show as a Sign up page, otherwise it'll show as a Sign in page.
         return (
-            <div>
+            <div className="auth-container">
                 <h2>{isSignUp ? 'Sign Up' : 'Sign In'}</h2>
                 <form onSubmit={handleSubmit}>
                     <div>
@@ -104,6 +121,10 @@ const Auth = () => {
                 <button onClick={() => setIsSignUp(!isSignUp)}>
                     {isSignUp ? 'Already have an account? Sign In' : 'New user? Sign Up'}
                 </button>
+
+                <p className={`message ${message.includes('successful') ? 'success' : 'error'}`}>
+                    {message}
+                </p>
             </div>
         );
     };

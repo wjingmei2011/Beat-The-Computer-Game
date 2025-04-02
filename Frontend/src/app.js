@@ -14,15 +14,28 @@ const [losses, setLosses]=useState(0);
 const [isGameOver, setGameOver]=useState(false);
 const [result, setResult]=useState('');
 const [finalResult, setFinalResult]=useState(0);
+const [message,setMessage]=useState('');
 const navigate = useNavigate();
-
 
 // first look up for the final result by username stored in local storage
 const username = localStorage.getItem('username');
-// checking user name
-console.log('username:', username);
 
 const backendUrl = process.env.REACT_APP_BACKEND_URL;
+
+//printing username and backendURL
+console.log('username:', username);
+console.log('backendUrl:', backendUrl);
+
+// define the useEffect for the final result by retrieving it from the database
+useEffect(()=>{
+    if(!username) {
+        alert('Please sign in first');
+        navigate('/');
+    } else {
+        getFinalResult();
+    }
+    }, [username]);
+
 
 const getFinalResult = async () => {
     const response = await fetch(`${backendUrl}/game/getFinalResult`, {
@@ -31,7 +44,7 @@ const getFinalResult = async () => {
         credentials: 'include',
     });
     const data= await response.json();
-    //checking the finalResult data in frontend
+    //printing the finalResult data in frontend
     console.log('Data::', data);
 
     if (response.ok) {
@@ -40,14 +53,6 @@ const getFinalResult = async () => {
         alert(`Error during retrieving final result: ${data.message}`);
     } 
 };
-
-
-// define the useEffect for the final result by retrieving it from the database
-useEffect(()=>{
-    if(username) {
-        getFinalResult();
-    }
-}, [username]);
 
 
 // define the event handler: 
@@ -79,14 +84,8 @@ const gameHandler = () => {
         resultMessage += "You lose this round!"
         setLosses(losses => losses+1);
     };
-
     setResult(resultMessage);
-
     setRoundsLeft(roundsLeft => roundsLeft-1); 
-
-    if (roundsLeft-1 === 0) {
-        setGameOver(true);
-    }
 };
 
 const resetGame=()=>{
@@ -102,14 +101,25 @@ const resetGame=()=>{
 
 // define the useEffect when the game is over
 
+
+useEffect(()=>{
+    if (roundsLeft === 0 && !isGameOver) {
+        setMessage('Game is Over!');
+        setTimeout(() => {
+            setGameOver(true);
+        }, 1000);
+    }   
+   }, [roundsLeft, isGameOver]);
+
+
 useEffect(()=>{
     if (isGameOver) {
-        alert('Game Over!');
         if (wins > losses) {
-            setFinalResult(finalResult => finalResult+1);
+        setFinalResult((finalResult) => finalResult + 1);
         }
     }
-   }, [isGameOver, wins, losses]);
+    },[isGameOver, wins, losses]);
+
 
 const logOut= async ()=>{
     // store the final result in the local storage, send it to the database and log out
@@ -123,15 +133,17 @@ const logOut= async ()=>{
     console.log('Data:', data);
 
     if (response.ok) {
-        alert('Final result is saved. You are logged out.');
+        setMessage('Final result is saved. You are logged out.');
+        setTimeout(() => {
+            navigate('/');
+            localStorage.removeItem('username');
+        }, 2000);
     } else {
         alert('Error during saving final result:', data.message);}
-    localStorage.removeItem('username');
-    navigate('/');
 };
 
 return (
-    <div className='container'>
+    <div className='app-container'>
         <div className='game-section'>
             <h2>Wanna try your luck today?</h2>
             <p>Pick a number between 0 - 10. The computer will also pick a number. Whoever is closer to the target wins! </p>
@@ -143,21 +155,27 @@ return (
                     value={userNumber}
                     min="0"
                     max="10"
+                    placeholder='Enter a number (0-10)'
                     onChange={(e)=>setUserNumber(Number(e.target.value))}
                  />
-                    <button onClick={gameHandler}>Submit</button>
+                    <button onClick={gameHandler} disabled={roundsLeft ===0} > 
+                    Submit
+                    </button>
                 
                 {targetNumber !== null && (
                     <p>{result}</p>
                 )}
-                <p>Total wins: {wins} | Total losses: {losses} | Rounds Left: {roundsLeft}</p>
+                <p className="game-stats">Total wins: {wins} | Total losses: {losses} | Rounds Left: {roundsLeft}</p>
 
                 </>
             ):(
                 <div className="game-over">
+                    <p className="gameover">{message}</p>
                     <p>Total wins: {wins} | Total losses: {losses}</p>
                     <p>{wins > losses? '🎉Congratulations🎉':'😢 Try Again Next Time!'}</p>
-                    <p>So far you've won {finalResult} round(s) - keep crushing it! </p>
+                    <div>
+                        <p>So far you've won {finalResult} round(s) - keep crushing it! </p>
+                    </div>
                     <button onClick={resetGame}>Try Again!</button>
                     <button onClick={logOut}>Log Out</button>
                 </div>
