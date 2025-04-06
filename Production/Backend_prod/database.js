@@ -1,6 +1,7 @@
 // set up the postgres db connection
     const { Pool } = require('pg');
     const dotenv = require('dotenv');
+    const bcrypt = require('bcryptjs');
     dotenv.config();
 
     const pool = new Pool({
@@ -8,15 +9,11 @@
         host: process.env.DB_HOST,
         database: process.env.DB_DATABASE,
         port: process.env.DB_PORT,
-        password: process.env.DB_PASSWORD,
-        ssl: {
-            rejectUnauthorized: false
-        }
+        password: process.env.DB_PASSWORD
     });
     pool.connect();
 
 // set up how the backend interacts with the database 
-console.log('DB_PASSWORD:', process.env.DB_PASSWORD);
 
 const db = {};
 db.testConnection = async() => {
@@ -30,9 +27,10 @@ db.testConnection = async() => {
 
 db.createUser = async (username, password) => {
     if (username && password) {
+        const hashedPassword = await bcrypt.hash(password, 10);
         const query = {
-            text: 'INSERT INTO users (username, password, final_result) VALUES ($1, $2, $3)',
-            values: [username, password, 0]
+            text: 'INSERT INTO users_minigame (username, password, final_result) VALUES ($1, $2, $3)',
+            values: [username, hashedPassword, 0]
         };
         try{
             await pool.query(query);
@@ -48,7 +46,7 @@ db.createUser = async (username, password) => {
 db.userExists = async (username) => {
     if (username) {
         const query = {
-            text: 'SELECT * FROM users WHERE username = $1',
+            text: 'SELECT * FROM users_minigame WHERE username = $1',
             values: [username]
         }; 
         try{
@@ -66,11 +64,17 @@ db.verifyUser = async (username, password) => {
 //if the select username from user database matches with the password then send back true response
     if (username && password) {
         const query = {
-            text: 'SELECT * FROM users WHERE username = $1 AND password = $2',
-            values: [username, password]
+            text: 'SELECT * FROM users_minigame WHERE username = $1',
+            values: [username]
         };
-        try {const result = await pool.query(query);
-        return result.rows.length > 0;
+        try {
+        const result = await pool.query(query);
+        if (result.rows.length === 0) {
+            throw new Error('User not found');
+        }
+        // decrypt the password from the database and compare it with the password entered by the user
+        const isMatch = await bcrypt.compare(password, result.rows[0].password);
+        return isMatch;
         } catch(error) {
             throw new Error(`There is an error during user verification:', ${error.message}`);
         }
@@ -82,7 +86,7 @@ db.verifyUser = async (username, password) => {
 db.getFinalResult = async (username) => {
     if (username) {
         const query = {
-            text: 'SELECT final_result FROM users WHERE username = $1',
+            text: 'SELECT final_result FROM users_minigame WHERE username = $1',
             values: [username]
         };
         try{
@@ -99,7 +103,7 @@ db.getFinalResult = async (username) => {
 db.updateFinalResult = async (username, finalResult) => {
     if (username && finalResult !== undefined) {
         const query = {
-            text: 'UPDATE users SET final_result = $2 WHERE username = $1',
+            text: 'UPDATE users_minigame SET final_result = $2 WHERE username = $1',
             values: [username, finalResult] 
         };
         try {await pool.query(query);
