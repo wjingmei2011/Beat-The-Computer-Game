@@ -136,6 +136,24 @@ p.message.error {
     font-size: 18px;
 }
 
+/* Styling for the game hints */
+.game-section .game-hints {
+    margin-top: 15px;
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-left: 4px solid #5470F5; /* Highlighted border */
+    border-radius: 4px;
+    color: #333;
+    line-height: 1.6;
+}
+
+.game-section .game-hints p {
+    margin: 5px 0;
+    font-style: italic;
+    font-size: 12px;
+    text-align: left;
+}
 .game-section input[type="number"] {
     width: 100%; /* Full width input */
     padding: 10px;
@@ -161,10 +179,10 @@ button:disabled {
 .game-over {
     margin-top: 20px;
     padding: 20px;
-    background-color: #f8d7da; /* Light red background for game over section */
-    border: 1px solid #f5c6cb; /* Red border */
+    background-color: #9fb6e4; /* Light red background for game over section */
+    border: 1px solid #81a1e0; /* Red border */
     border-radius: 8px;
-    color: #721c24; /* Dark red text */
+    color: #224d92; /* Dark blue text */
     text-align: center;
 }
 
@@ -172,22 +190,22 @@ button:disabled {
     font-size: 20px;
     font-weight: bold;
     margin-bottom: 15px;
+    color: #223352;
 }
 
 .game-over p {
     margin: 10px 0;
     font-size: 18px;
-}
-
-.game-over p:first-of-type {
-    font-size: 22px;
-    font-weight: bold;
     color: #333;
 }
 
-.game-over p:last-of-type {
-    font-size: 16px;
-    color: #555;
+
+.game-over .congratulations {
+    font-size: 23px; /* Larger font size */
+    font-weight: bold; /* Bold font */
+    color: #902c41; /* prominent color */
+    text-transform: uppercase; /* Optional: Uppercase text */
+    margin-top: 10px; /* Add spacing above */
 }
 
 .game-over button {
