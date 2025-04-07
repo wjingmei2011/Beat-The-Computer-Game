@@ -8,6 +8,6 @@ const controller = require('./controller');
 router.post('/signup', controller.signup);
 router.post('/signin', controller.signin);
 router.post('/updateFinalResult', controller.updateFinalResult);
-router.get('/getFinalResult', controller.getFinalResult);
+router.post('/getFinalResult', controller.getFinalResult);
 
 module.exports = router; 

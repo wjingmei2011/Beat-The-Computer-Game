@@ -6,12 +6,17 @@ const routes = require('./routes');
 const session = require('express-session');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const store = new session.MemoryStore(); // store session data in memory
+const { RedisStore } = require('connect-redis');
+const {createClient} = require('redis');
 const db = require('./database');
+
 
 console.log('server.js is running');
 
-//enable environment variables without exposing them in the code
+// Test database connection
+db.testConnection();
+
+// Middleware for enabling environment variables without exposing them in the code
 dotenv.config();
 
 //initialize the server
@@ -23,31 +28,53 @@ app.use(express.json());
 // Middleware for logging HTTP requests to the console
 app.use(morgan('dev'));
 
+
 // Middleware for enabling CORS
 app.use(cors(
     {
-        origin: [process.env.CORS_ORIGIN, 'http://localhost:3000'],
+        origin: [process.env.CORS_ORIGIN],
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
         credentials: true
     }
 ));
+
+//initialize the Redis client
+const redisClient = createClient({
+    url: process.env.REDIS_URL,
+});
+
+// Connect to Redis
+redisClient.connect().then(()=> {
+    console.log('Redis Connected');
+}).catch(console.error);
+
+// Handle Redis connection errors
+redisClient.on('error', (err) => {
+    console.error('Redis Client Error', err);
+});
+
+//initialize the Redis store
+const store = new RedisStore({
+    client: redisClient
+});
 
 
 // Middleware for session management
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false, // don't save session when there's no modification
-    saveUninitialized: false, // always create a session even if there's no data
-    store: store, // store session data in memory
+    saveUninitialized: true, // always create a session even if there's no data
+    store: store,
     cookie: {
         httpOnly: true, // prevent client-side JavaScript from accessing the cookie
-        secure: process.env.NODE_ENV === 'production', // use secure cookies in production
-        maxAge: 1000 * 60 * 6 // cookie expiration time (10 mins)
-    }
-}))
+        secure: true, // when HTTPS is enabled
+        sameSite: 'None',
+        maxAge: 1000 * 60 * 15, // cookie expiration time (15 mins)
+        domain: 'onrender.com'
+    },
+}));
 
-// Test database connection
-db.testConnection();
+
 
 // define API routes
 app.use('/game', routes);

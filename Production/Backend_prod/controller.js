@@ -30,6 +30,7 @@ controller.signin = async (req, res, next) => {
         const result = await db.verifyUser(username, password); 
         if (result) {
         req.session.username = username; // store the username in the session
+        console.log('Session after signin:', req.session);
         res.status(200).json({message:'User signed in', username});
         } else {
             res.status (401).json({message: 'Invalid username or password'});
@@ -41,16 +42,16 @@ controller.signin = async (req, res, next) => {
 };
 
 controller.getFinalResult = async (req, res, next) => {
-    console.log('Session Data:', req.session);
-    const username = req.session.username;
+    const {username} = req.body;    
     if (!username) {
-        return res.status(401).json({message:'/unauthorized: Please sign in'});
+        return res.status(401).json({message:'Cannot find session data'});
     } 
     try{
         const finalResult = await db.getFinalResult(username);
         if (finalResult !== undefined) {
             console.log('Final Result:', finalResult);
             res.status(200).json({finalResult});
+            console.log('Session after getFinalResult:', req.session);
         } else {
             res.status(404).json({message:'Final result not found in the database'});
         }

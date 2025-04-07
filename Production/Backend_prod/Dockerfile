@@ -10,6 +10,9 @@ COPY package*.json ./
 # Install dependencies
 RUN npm install
 
+# Add debugging step to verify installed versions
+RUN npm list connect-redis redis
+
 # Copy the rest of the application code to the working directory
 COPY . .
 
