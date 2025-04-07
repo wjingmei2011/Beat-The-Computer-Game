@@ -165,7 +165,7 @@ const logOut= async ()=>{
     console.log('Data:', data);
 
     if (response.ok) {
-        setMessage('Final result is saved. You are logged out.');
+        setMessage('Final result is saved. You are being logged out.');
         setTimeout(() => {
             navigate('/');
             localStorage.removeItem('username');
