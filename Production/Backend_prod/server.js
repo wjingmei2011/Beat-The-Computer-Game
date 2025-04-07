@@ -37,8 +37,13 @@ app.use(cors(
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false, // don't save session when there's no modification
-    saveUninitialized: true, // always create a session even if there's no data
+    saveUninitialized: false, // always create a session even if there's no data
     store: store, // store session data in memory
+    cookie: {
+        httpOnly: true, // prevent client-side JavaScript from accessing the cookie
+        secure: process.env.NODE_ENV === 'production', // use secure cookies in production
+        maxAge: 1000 * 60 * 6 // cookie expiration time (10 mins)
+    }
 }))
 
 // Test database connection
