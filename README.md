@@ -12,6 +12,11 @@ Welcome to the [**Beat the Computer\!**](https://frontend-img-amd.onrender.com/)
 
 ---
 
+**My Key Take-away**
+while it’s super efficient to spin up a full stack—including a containerized database—using Docker Compose during development, in production it’s much easier to separate the deployment. Using managed database services while containerizing other services works better for scalability and ease of maintenance, especially given the stateful nature of databases.
+
+---
+
 **Frontend**
 
 Built using **React.js**, a powerful JavaScript library for creating interactive UIs effortlessly.
@@ -72,5 +77,5 @@ Render is perfect for this application due to:
 
 Feel free to explore and contribute :)
 
-Happy coding and enjoy playing\!
+Hope you have a good game\!
 
