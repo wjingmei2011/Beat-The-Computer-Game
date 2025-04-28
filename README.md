@@ -49,7 +49,7 @@ Powered by **Node.js** & **Express.js**, offering simplicity and high performanc
 **Caching & Session Management:**
 
 * **Redis**: Instead of *MemoryStore*, provided by express-session and a basic in-memory store primarily intended for development and testing purposes, I chose Redis which efficiently handles real-time interactions, requests across multi-server instances, and can be easily deployed / connected on Render.  
-  ·   	**localStorage**: Utilized on the client side in conjunction with Redis and express-session, providing additional persistence and ensuring quick data access directly within the user's browser.
+* **localStorage**: Utilized on the client side in conjunction with Redis and express-session, providing additional persistence and ensuring quick data access directly within the user's browser.
 
 ---
 
